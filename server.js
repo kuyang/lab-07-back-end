@@ -25,14 +25,14 @@ app.get('/weather', getWeather)
 
 app.get('/yelpAPI', (request, response) => {
     const url = `https://api.yelp.com/v3/businesses/search?term=food&latitude=37.8267&longitude=-122.4233`
-    superagent.get(url).set('Authorization', `Bearer eAJhDnd1F8Jpkl9H8KWN-5AxQu8U3w3r01ax1iJPOhaTPaIWDvJnbaaOxLT1YoQ5_N-osKAdG_hpDt-AyNZHneYQlaHPAFYrSeLJCily_ncsQkHKDL1m9Ed-3NTdW3Yx`)
+    superagent.get(url).set('Authorization', `Bearer ${process.env.YELP_API_KEY}`)
         .then(res => response.send(res.body))
         .catch(err => response.send(HandleError(err)))
 })
 
 app.get('/yelp', (request, response) => {
     const url = `https://api.yelp.com/v3/businesses/search?term=food&latitude=37.8267&longitude=-122.4233`
-    superagent.get(url).set('Authorization', `Bearer eAJhDnd1F8Jpkl9H8KWN-5AxQu8U3w3r01ax1iJPOhaTPaIWDvJnbaaOxLT1YoQ5_N-osKAdG_hpDt-AyNZHneYQlaHPAFYrSeLJCily_ncsQkHKDL1m9Ed-3NTdW3Yx`)
+    superagent.get(url).set('Authorization', `Bearer ${process.env.YELP_API_KEY}`)
         .then(res => response.send({
             Restaurant_1: res.body.businesses[0].name,
             yelp_rating: res.body.businesses[0].rating,
@@ -67,7 +67,7 @@ app.get('/movies',(request, response)=>{
 
 
 // app.get('/location',(request, response) => {
-//     const url = `https://maps.googleapis.com/maps/api/geocode/json?key=AIzaSyAW1TEC4aep3rrsRW9Z8EYiYNOC8d387v0&address=7600+wisconsin+ave+Bethesda+MD`
+//     const url = `https://maps.googleapis.com/maps/api/geocode/json?key=${process.env.GOOGLEGEOCODE_API_KEY}&address=7600+wisconsin+ave+Bethesda+MD`
 //     superagent.get(url)
 //         .then(res => response.send({
 //             latitude: res.body.results[0].geometry.location.lat,
@@ -78,7 +78,7 @@ app.get('/movies',(request, response)=>{
 // })
 
 // app.get('/weather',(request, response) => {
-//     const url = `https://api.darksky.net/forecast/6852ea92d3dacece95b7c3ba1d4c2d57/37.8267,-122.4233`
+//     const url = `https://api.darksky.net/forecast/${process.env.DARKSKY_API_CODE}/37.8267,-122.4233`
 //     superagent.get(url)
 //         .then(res => response.send(res.body))
 // })
