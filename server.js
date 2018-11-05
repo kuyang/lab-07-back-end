@@ -22,7 +22,7 @@ app.get('/location',(request, response) => {
 })
 
 app.get('/weather', getWeather)
-//***** To view original API list ****
+
 app.get('/yelpAPI', (request, response) => {
     const url = `https://api.yelp.com/v3/businesses/search?term=food&latitude=37.8267&longitude=-122.4233`
     superagent.get(url).set('Authorization', `Bearer eAJhDnd1F8Jpkl9H8KWN-5AxQu8U3w3r01ax1iJPOhaTPaIWDvJnbaaOxLT1YoQ5_N-osKAdG_hpDt-AyNZHneYQlaHPAFYrSeLJCily_ncsQkHKDL1m9Ed-3NTdW3Yx`)
@@ -44,7 +44,7 @@ app.get('/yelp', (request, response) => {
         }))
         .catch(err => response.send(HandleError(err)))
 })
-// ******** To view original API list *******
+
 app.get('/moviesAPI',(request, response)=>{
     const url = `https://api.themoviedb.org/3/movie/now_playing?page=1&language=en-US&api_key=${process.env.MOVIES_API_KEY}`
     superagent.get(url)
