@@ -14,34 +14,20 @@ const PORT = process.env.PORT||3000;
 app.use(cors())
 
 //********* ROUTES ********
-
 app.get('/location',(request, response) => {
     getLocation(request.query.data)
         .then(res => response.send(res))
         .catch(err => response.send(err))
 })
-
 app.get('/weather', getWeather)
+app.get('/yelp', getYelp)
+app.get('/movies', getMovies)
 
+// ***** Routes with full API list *****
 app.get('/yelpAPI', (request, response) => {
     const url = `https://api.yelp.com/v3/businesses/search?term=food&latitude=37.8267&longitude=-122.4233`
-    superagent.get(url).set('Authorization', `Bearer eAJhDnd1F8Jpkl9H8KWN-5AxQu8U3w3r01ax1iJPOhaTPaIWDvJnbaaOxLT1YoQ5_N-osKAdG_hpDt-AyNZHneYQlaHPAFYrSeLJCily_ncsQkHKDL1m9Ed-3NTdW3Yx`)
+    superagent.get(url).set('Authorization', `Bearer ${process.env.YELP_API_KEY}`)
         .then(res => response.send(res.body))
-        .catch(err => response.send(HandleError(err)))
-})
-
-app.get('/yelp', (request, response) => {
-    const url = `https://api.yelp.com/v3/businesses/search?term=food&latitude=37.8267&longitude=-122.4233`
-    superagent.get(url).set('Authorization', `Bearer eAJhDnd1F8Jpkl9H8KWN-5AxQu8U3w3r01ax1iJPOhaTPaIWDvJnbaaOxLT1YoQ5_N-osKAdG_hpDt-AyNZHneYQlaHPAFYrSeLJCily_ncsQkHKDL1m9Ed-3NTdW3Yx`)
-        .then(res => response.send({
-            Restaurant_1: res.body.businesses[0].name,
-            yelp_rating: res.body.businesses[0].rating,
-            Info_1: res.body.businesses[0].categories[0].title,
-            Info_2: res.body.businesses[0].categories[1].title,
-            Address: res.body.businesses[0].location.display_address,
-            Phone: res.body.businesses[0].display_phone,
-            Yelp_url: res.body.businesses[0].url,
-        }))
         .catch(err => response.send(HandleError(err)))
 })
 
@@ -51,23 +37,10 @@ app.get('/moviesAPI',(request, response)=>{
         .then(res => response.send(res.body))
         .catch(err => response.send(HandleError(err)))
 })
-
-app.get('/movies',(request, response)=>{
-    const url = `https://api.themoviedb.org/3/movie/now_playing?page=1&language=en-US&api_key=${process.env.MOVIES_API_KEY}`
-    superagent.get(url)
-        .then(res => response.send({
-            Title: res.body.results[0].title,
-            Overview: res.body.results[0].overview,
-            Release_date: res.body.results[0].release_date,
-            Vote_count: res.body.results[0].vote_count,
-            Vote_average: res.body.results[0].vote_average
-        }))
-        .catch(err => response.send(HandleError(err)))
-})
-
-
+//  ******** Old Codes *******
+//
 // app.get('/location',(request, response) => {
-//     const url = `https://maps.googleapis.com/maps/api/geocode/json?key=AIzaSyAW1TEC4aep3rrsRW9Z8EYiYNOC8d387v0&address=7600+wisconsin+ave+Bethesda+MD`
+//     const url = `https://maps.googleapis.com/maps/api/geocode/json?key=${process.env.GOOGLEGEOCODE_API_KEY}&address=7600+wisconsin+ave+Bethesda+MD`
 //     superagent.get(url)
 //         .then(res => response.send({
 //             latitude: res.body.results[0].geometry.location.lat,
@@ -78,7 +51,7 @@ app.get('/movies',(request, response)=>{
 // })
 
 // app.get('/weather',(request, response) => {
-//     const url = `https://api.darksky.net/forecast/6852ea92d3dacece95b7c3ba1d4c2d57/37.8267,-122.4233`
+//     const url = `https://api.darksky.net/forecast/${process.env.DARKSKY_API_CODE}/37.8267,-122.4233`
 //     superagent.get(url)
 //         .then(res => response.send(res.body))
 // })
@@ -95,7 +68,7 @@ app.get('/movies',(request, response)=>{
 //         }))
 // })
 
-
+//****** Reporting *******
 app.get(`*`, (request,response) => {
     response.send(`<img src="http://http.cat/500" />`);
 })
@@ -104,8 +77,11 @@ app.listen(PORT, () => {
     console.log(`Yo the server jawnt is now running on port: ${PORT}`)
 })
 
-//****** LOCATION *******
+function HandleError(err){
+    return({error: err, message:`Someting is broken dude!!!`})
+}
 
+//****** LOCATION *******
 function getLocation(query){
     const url = `https://maps.googleapis.com/maps/api/geocode/json?key=${process.env.GOOGLEGEOCODE_API_KEY}&address=${query}`
     return superagent.get(url)
@@ -113,12 +89,11 @@ function getLocation(query){
             return new Location(res.body.results[0].geometry.location.lat, res.body.results[0].geometry.location.lng)
         })
 }
-
 function Location(lat,lng){
     this.latitude = lat;
     this.longitude = lng;
-
 }
+
 
 //****** WEATHER ******
 function getWeather(request, response){
@@ -136,18 +111,32 @@ function Weather(weatherObj){
 }
 
 //*********** Yelp ******
-// function GetYelp(request, response){
-//     const url =  `https://api.yelp.com/v3/businesses/search`
-
-
-// }
- 
+function getYelp(request, response){
+    const url = `https://api.yelp.com/v3/businesses/search?term=food&latitude=37.8267&longitude=-122.4233`
+    superagent.get(url).set('Authorization', `Bearer ${process.env.YELP_API_KEY}`)
+        .then(res => response.send(new Yelp(res.body)))
+        .catch(err => response.send(HandleError(err)))    
+}
+function Yelp(yelpObj){
+    this.Restaurant_1 = yelpObj.businesses[0].name,
+    this.yelp_rating = yelpObj.businesses[0].rating,
+    this.Info_1 = yelpObj.businesses[0].categories[0].title,
+    this.Info_2 = yelpObj.businesses[0].categories[1].title,
+    this.Address = yelpObj.businesses[0].location.display_address,
+    this.Phone = yelpObj.businesses[0].display_phone,
+    this.Yelp_url = yelpObj.businesses[0].url
+}
 //*********** Movie DB ********
-
-
-
-//******* Error handeler ********
-
-function HandleError(err){
-    return({error: err, message:`Someting is broken dude!!!`})
+function getMovies(request, response){
+    const url = `https://api.themoviedb.org/3/movie/now_playing?page=1&language=en-US&api_key=${process.env.MOVIES_API_KEY}`
+    superagent.get(url)
+        .then(res => response.send(new Movies(res.body)))
+        .catch(err => response.send(HandleError(err)))
+}
+function Movies(moviesObj){
+    this.Title = moviesObj.results[0].title,
+    this.Overview = moviesObj.results[0].overview,
+    this.Release_date = moviesObj.results[0].release_date,
+    this.Vote_count = moviesObj.results[0].vote_count,
+    this.Vote_average = moviesObj.results[0].vote_average
 }
